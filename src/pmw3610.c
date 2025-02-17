@@ -612,14 +612,6 @@ static int pmw3610_report_data(const struct device *dev) {
 
     data->curr_mode = input_mode;
 
-#if AUTOMOUSE_LAYER > 0
-    if (input_mode == MOVE &&
-            (automouse_triggered || zmk_keymap_highest_layer_active() != AUTOMOUSE_LAYER)
-    ) {
-        activate_automouse_layer();
-    }
-#endif
-
     int err = motion_burst_read(dev, buf, sizeof(buf));
     if (err) {
         return err;
@@ -654,6 +646,14 @@ static int pmw3610_report_data(const struct device *dev) {
     if (IS_ENABLED(CONFIG_PMW3610_INVERT_Y)) {
         y = -y;
     }
+
+#if AUTOMOUSE_LAYER > 0
+    if (input_mode == MOVE &&
+            (automouse_triggered || zmk_keymap_highest_layer_active() != AUTOMOUSE_LAYER) && abs(x) + abs(y) > CONFIG_PMW3610_AUTOMOUSE_THRESHOLD
+    ) {
+        activate_automouse_layer();
+    }
+#endif
 
 #ifdef CONFIG_PMW3610_SMART_ALGORITHM
     int16_t shutter =
