@@ -135,6 +135,18 @@ extern "C" {
 #define PMW3610_SCROLL_Y_POSITIVE 1
 #endif
 
+/* pmw3610_current_config構造体の定義 */
+struct pmw3610_current_config {
+    uint32_t cpi;
+    int32_t div;
+    uint32_t snipe_cpi;
+    int32_t snipe_div;
+};
+
+/* Getter and Setter for current_config */
+struct pmw3610_current_config get_current_config(void);
+void set_current_config(struct pmw3610_current_config config);
+
 #ifdef __cplusplus
 }
 #endif

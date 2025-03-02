@@ -61,6 +61,24 @@ static int (*const async_init_fn[ASYNC_INIT_STEP_COUNT])(const struct device *de
 
 //////// Function definitions //////////
 
+// グローバル変数として宣言し、初期化
+struct pmw3610_current_config current_config = {
+    .cpi = CONFIG_PMW3610_CPI,
+    .div = CONFIG_PMW3610_CPI_DIVIDOR,
+    .snipe_cpi = CONFIG_PMW3610_SNIPE_CPI,
+    .snipe_div = CONFIG_PMW3610_SNIPE_CPI_DIVIDOR,
+};
+
+/* Getter for current_config */
+struct pmw3610_current_config get_current_config(void) {
+    return current_config;
+}
+
+/* Setter for current_config */
+void set_current_config(struct pmw3610_current_config config) {
+    current_config = config;
+}
+
 // checked and keep
 static int spi_cs_ctrl(const struct device *dev, bool enable) {
     const struct pixart_config *config = dev->config;
@@ -591,11 +609,11 @@ static int pmw3610_report_data(const struct device *dev) {
     bool input_mode_changed = data->curr_mode != input_mode;
     switch (input_mode) {
     case MOVE:
-        set_cpi_if_needed(dev, CONFIG_PMW3610_CPI);
-        dividor = CONFIG_PMW3610_CPI_DIVIDOR;
+        set_cpi_if_needed(dev, current_config.cpi);
+        dividor = current_config.div;
         break;
     case SCROLL:
-        set_cpi_if_needed(dev, CONFIG_PMW3610_CPI);
+        set_cpi_if_needed(dev, current_config.cpi);
         if (input_mode_changed) {
             data->scroll_delta_x = 0;
             data->scroll_delta_y = 0;
@@ -603,8 +621,8 @@ static int pmw3610_report_data(const struct device *dev) {
         dividor = 1; // this should be handled with the ticks rather than dividors
         break;
     case SNIPE:
-        set_cpi_if_needed(dev, CONFIG_PMW3610_SNIPE_CPI);
-        dividor = CONFIG_PMW3610_SNIPE_CPI_DIVIDOR;
+        set_cpi_if_needed(dev, current_config.snipe_cpi);
+        dividor = current_config.snipe_div;
         break;
     default:
         return -ENOTSUP;
